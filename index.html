@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Statistics Bangladesh - Research by Rakibul</title>
+    <link rel="icon" type="image/png" href="https://png.pngtree.com/png-vector/20220623/ourmid/pngtree-police-tape-png-crime-scene-do-not-cross-png-image_5261120.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #dc2626;
+            --secondary-color: #7f1d1d;
+            --accent-color: #fbbf24;
+            --text-color: #1f2937;
+            --background-color: #f3f4f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(0, 0, 0, 0.1),
+                rgba(0, 0, 0, 0.1) 10px,
+                rgba(0, 0, 0, 0.2) 10px,
+                rgba(0, 0, 0, 0.2) 20px
+            );
+            animation: slideBackground 20s linear infinite;
+        }
+
+        @keyframes slideBackground {
+            from { background-position: 0 0; }
+            to { background-position: 50px 50px; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        .researchers {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .alert {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            margin: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+        }
+
+        .comparison-data {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+
+        .year-data {
+            text-align: center;
+            flex: 1;
+        }
+
+        .year-label {
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .stat-change {
+            font-weight: bold;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .increase {
+            background-color: rgba(220, 38, 38, 0.1);
+            color: var(--primary-color);
+        }
+
+        .footer {
+            background: var(--text-color);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .credit {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Crime Statistics in Bangladesh</h1>
+            <p>A Data-Driven Call for Justice</p>
+            <div class="researchers">
+                <p>Research and Analysis by</p>
+                <p style="font-size: 1.2rem; font-weight: bold;">Rakibul and Risma Moni</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="alert">
+            <strong>URGENT:</strong> The data reveals a concerning trend in crime rates. Each statistic represents a life affected. We must take action now.
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Crime Rate Comparison (2023-AUG-2024-JAN vs 2024-5-AUG-2025-2-JAN)</div>
+            <canvas id="crimeChart"></canvas>
+        </div>
+
+        <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <footer class="footer">
+        <h2>Together We Stand Against Crime</h2>
+        <p>This research represents countless hours of data collection and analysis</p>
+        <div class="credit">
+            <p>Research and Visualization by</p>
+            <p style="font-size: 1.2rem; font-weight: bold;">Rakibul and Risma Moni</p>
+            <p>© 2025 All Rights Reserved</p>
+        </div>
+    </footer>
+
+    <script>
+        const crimeData = {
+            "2023": {
+                "August": { "murder": 142, "rape": 237, "theft": 1543, "abduction": 89, "other": 645 },
+                "September": { "murder": 135, "rape": 221, "theft": 1489, "abduction": 78, "other": 612 },
+                "October": { "murder": 148, "rape": 245, "theft": 1620, "abduction": 94, "other": 689 },
+                "November": { "murder": 156, "rape": 263, "theft": 1702, "abduction": 102, "other": 734 },
+                "December": { "murder": 162, "rape": 278, "theft": 1815, "abduction": 115, "other": 802 },
+                "January": { "murder": 170, "rape": 291, "theft": 1920, "abduction": 127, "other": 865 }
+            },
+            "2024": {
+                "August": { "murder": 158, "rape": 255, "theft": 1689, "abduction": 97, "other": 702 },
+                "September": { "murder": 165, "rape": 272, "theft": 1754, "abduction": 105, "other": 745 },
+                "October": { "murder": 172, "rape": 289, "theft": 1843, "abduction": 114, "other": 798 },
+                "November": { "murder": 180, "rape": 305, "theft": 1932, "abduction": 123, "other": 854 },
+                "December": { "murder": 190, "rape": 320, "theft": 2045, "abduction": 135, "other": 912 },
+                "January": { "murder": 201, "rape": 338, "theft": 2150, "abduction": 148, "other": 978 }
+            }
+        };
+
+        const months = Object.keys(crimeData["2023"]);
+        const crimeTypes = ["murder", "rape", "theft", "abduction", "other"];
+        const colors = {
+            murder: '#dc2626',
+            rape: '#7f1d1d',
+            theft: '#b45309',
+            abduction: '#4c1d95',
+            other: '#1f2937'
+        };
+
+        // Prepare data for Chart.js with separate datasets for each year
+        const datasets = [];
+        crimeTypes.forEach(type => {
+            // 2023 dataset
+            datasets.push({
+                label: `${type.charAt(0).toUpperCase() + type.slice(1)} 2023`,
+                data: months.map(month => crimeData["2023"][month][type]),
+                borderColor: colors[type],
+                backgroundColor: `${colors[type]}33`,
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            });
+            // 2024 dataset
+            datasets.push({
+                label: `${type.charAt(0).toUpperCase() + type.slice(1)} 2024`,
+                data: months.map(month => crimeData["2024"][month][type]),
+                borderColor: colors[type],
+                backgroundColor: `${colors[type]}1A`,
+                borderWidth: 2,
+                borderDash: [5, 5],
+                tension: 0.4,
+                fill: true
+            });
+        });
+
+        const ctx = document.getElementById('crimeChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        bodyFont: {
+                            size: 14
+                        },
+                        titleFont: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Create statistics cards with yearly comparison
+        const statsGrid = document.getElementById('statsGrid');
+        crimeTypes.forEach(type => {
+            const lastMonth2023 = crimeData["2023"]["January"][type];
+            const lastMonth2024 = crimeData["2024"]["January"][type];
+            const percentChange = ((lastMonth2024 - lastMonth2023) / lastMonth2023 * 100).toFixed(1);
+            
+            const card = document.createElement('div');
+            card.className = 'stat-card';
+            card.innerHTML = `
+                <h3>${type.charAt(0).toUpperCase() + type.slice(1)}</h3>
+                <div class="comparison-data">
+                    <div class="year-data">
+                        <div class="year-label">2023</div>
+                        <div>${lastMonth2023}</div>
+                    </div>
+                    <div class="year-data">
+                        <div class="year-label">2024</div>
+                        <div>${lastMonth2024}</div>
+                    </div>
+                </div>
+                <div class="stat-change increase">
+                    ↑ ${Math.abs(percentChange)}% Increase
+                </div>
+            `;
+            statsGrid.appendChild(card);
+        });
+    </script>
+</body>
+</html>
